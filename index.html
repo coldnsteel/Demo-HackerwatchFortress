@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackerWatch-Fortress: Professional Security System v2.3 - Demo</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid #00ff00;
+            padding: 15px 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+        .main-container {
+            margin-top: 120px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            min-height: calc(100vh - 140px);
+        }
+        .panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .panel h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+        .threat-level {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            text-shadow: 0 0 20px currentColor;
+            font-weight: bold;
+        }
+        .level-low { color: #00ff00; }
+        .level-medium { color: #ffff00; }
+        .level-high { color: #ff6600; }
+        .level-critical { color: #ff0000; }
+        .metrics {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
+        }
+        .metrics-label { font-weight: bold; }
+        .metrics-value { color: #00ff00; font-weight: bold; }
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 15px 0;
+            border: 1px solid #00ff00;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #00ff00;
+            border-radius: 12px;
+        }
+        .scan-button {
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .scan-button:hover {
+            box-shadow: 0 0 20px #00ff00;
+            transform: translateY(-2px);
+        }
+        .scan-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .terminal {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid #00ff00;
+        }
+        .log-entry {
+            margin: 3px 0;
+            padding: 4px 0;
+            border-left: 3px solid #00ff00;
+            padding-left: 8px;
+        }
+        .log-warning { border-left-color: #ffff00; color: #ffff00; }
+        .log-error { border-left-color: #ff0000; color: #ff6666; }
+        .log-info { border-left-color: #00aaff; color: #00aaff; }
+        .log-success { border-left-color: #00ff00; color: #00ff00; }
+        .blinking-cursor::after {
+            content: '_';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .network-node {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        .network-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #00ff00;
+        }
+        .node-secure { border-color: #00ff00; color: #00ff00; }
+        .node-warning { border-color: #ffff00; color: #ffff00; animation: warningPulse 2s infinite; }
+        .node-threat { border-color: #ff0000; color: #ff0000; animation: threatPulse 1s infinite; }
+        @keyframes warningPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        @keyframes threatPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        .alert-banner {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.95);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1001;
+            animation: slideIn 0.5s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.4);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        .ip-info {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 3px solid #00aaff;
+            font-size: 12px;
+        }
+        .demo-notice {
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            color: #ffff00;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .main-container { grid-template-columns: 1fr; margin-top: 140px; padding: 10px; }
+            .header { padding: 10px; }
+            .status-bar { font-size: 10px; }
+            .threat-level { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ HackerWatch-Fortress v2.3 - Demo Mode</h1>
+        <div class="status-bar">
+            <span>Status: <span id="systemStatus">OPERATIONAL</span></span>
+            <span>Last Scan: <span id="lastScan">Ready</span></span>
+            <span>Session: <span id="sessionId">HWF-DEMO</span></span>
+            <span>Contact: lexalytics@yahoo.com</span>
+        </div>
+    </div>
+    <div class="alert-banner" id="alertBanner">
+        <strong>ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+    <div class="main-container">
+        <div class="panel">
+            <div class="demo-notice">🚀 DEMO MODE - Try Before You Buy! Full Version $19 (Student Price)</div>
+            <h3>💼 Product Information</h3>
+            <div class="metrics">
+                <span class="metrics-label">Version:</span>
+                <span class="metrics-value">Demo v2.3</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">License:</span>
+                <span class="metrics-value">Evaluation</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Full Version:</span>
+                <span class="metrics-value">$19 (Student)</span>
+            </div>
+            <button class="scan-button" onclick="window.open('https://coldnsteel.github.io/GMSRFC/fortress-grand-opening.html', '_blank')">
+                🛒 Purchase Full Version
+            </button>
+        </div>
+        <div class="panel">
+            <h3>🎯 Threat Assessment</h3>
+            <div class="threat-level level-low" id="threatLevel">LOW</div>
+            <div class="metrics">
+                <span class="metrics-label">Security Score:</span>
+                <span class="metrics-value" id="securityScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="securityProgress" style="width: 92%"></div>
+            </div>
+            <button class="scan-button" id="scanButton">🔍 Run Security Scan</button>
+            <div class="metrics">
+                <span class="metrics-label">Demo Scans:</span>
+                <span class="metrics-value" id="scanCount">0/3</span>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>🌐 Network Status</h3>
+            <div class="metrics">
+                <span class="metrics-label">Connection:</span>
+                <span class="metrics-value" id="connectionStatus">SECURE</span>
+            </div>
+            <div class="network-grid" id="networkGrid">
+                <div class="network-node node-secure" title="Router">RT</div>
+                <div class="network-node node-secure" title="Computer">PC</div>
+                <div class="network-node node-secure" title="Phone">PH</div>
+                <div class="network-node node-secure" title="WiFi">WF</div>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Open Ports:</span>
+                <span class="metrics-value" id="openPorts">3 (Standard)</span>
+            </div>
+            <button class="scan-button" id="networkScan">📡 Network Scan</button>
+        </div>
+        <div class="panel">
+            <h3>📱 Device Information</h3>
+            <div class="metrics">
+                <span class="metrics-label">Device:</span>
+                <span class="metrics-value" id="deviceType">Detecting...</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Browser:</span>
+                <span class="metrics-value" id="browserInfo">Detecting...</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Security:</span>
+                <span class="metrics-value" id="browserSecurity">Checking...</span>
+            </div>
+            <div class="ip-info" id="ipInfo">
+                <strong>IP Information:</strong><br>
+                <span id="ipDetails">Loading...</span>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>📊 Activity Monitor</h3>
+            <div class="terminal" id="activityLog">
+                <div class="log-entry log-success">[INIT] HackerWatch-Fortress Demo Started</div>
+                <div class="log-entry log-info">[INFO] Demonstration mode active</div>
+                <div class="log-entry log-info">[INFO] Basic security monitoring enabled</div>
+                <div class="log-entry log-info">[INFO] Device detection initialized</div>
+                <div class="log-entry log-success">[READY] System ready for demonstration</div>
+                <div class="blinking-cursor"></div>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>⭐ Professional Features</h3>
+            <div class="metrics">
+                <span class="metrics-label">Real-time Monitoring:</span>
+                <span style="color: #ffff00;">PRO ONLY</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">VPN Detection:</span>
+                <span style="color: #ffff00;">PRO ONLY</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Threat Blocking:</span>
+                <span style="color: #ffff00;">PRO ONLY</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Email Protection:</span>
+                <span style="color: #ffff00;">PRO ONLY</span>
+            </div>
+            <div class="metrics">
+                <span class="metrics-label">Crypto Wallet Safety:</span>
+                <span style="color: #ffff00;">PRO ONLY</span>
+            </div>
+            <button class="scan-button" onclick="window.open('https://coldnsteel.github.io/GMSRFC/fortress-grand-opening.html', '_blank')">
+                🚀 Upgrade to Professional
+            </button>
+        </div>
+    </div>
+    <script src="security-config.js"></script>
+    <script>
+        (function() {
+            'use strict';
+            let scanCount = 0;
+            const maxDemoScans = 3;
+            function init() {
+                console.log('🛡️ HackerWatch-Fortress Demo v2.3 Initializing...');
+                if (window.securityConfig) {
+                    window.securityConfig.init();
+                    addLog('CONFIG', 'Security config loaded - Total Threats: ' + window.securityConfig.stats.totalThreats, 'log-success');
+                }
+                detectDevice();
+                detectBrowser();
+                checkIPInfo();
+                addLog('INIT', 'Demo version initialized', 'log-success');
+                generateSessionId();
+            }
+            function generateSessionId() {
+                const sessionId = 'HWF-DEMO-' + Date.now().toString().slice(-6);
+                document.getElementById('sessionId').textContent = sessionId;
+            }
+            function detectDevice() {
+                const userAgent = navigator.userAgent;
+                let deviceType = 'Desktop Computer';
+                let browserName = 'Unknown Browser';
+                if (/Android/i.test(userAgent)) {
+                    deviceType = 'Android Device';
+                } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                    deviceType = 'iOS Device';
+                } else if (/Windows/i.test(userAgent)) {
+                    deviceType = 'Windows PC';
+                } else if (/Mac/i.test(userAgent)) {
+                    deviceType = 'Mac Computer';
+                } else if (/Linux/i.test(userAgent)) {
+                    deviceType = 'Linux System';
+                }
+                if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+                    browserName = 'Google Chrome';
+                } else if (userAgent.includes('Firefox')) {
+                    browserName = 'Mozilla Firefox';
+                } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                    browserName = 'Safari';
+                } else if (userAgent.includes('Edg')) {
+                    browserName = 'Microsoft Edge';
+                }
+                document.getElementById('deviceType').textContent = deviceType;
+                document.getElementById('browserInfo').textContent = browserName;
+                let securityLevel = 'GOOD';
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                    securityLevel = 'MODERATE';
+                }
+                if (!window.crypto || !window.crypto.subtle) {
+                    securityLevel = 'LIMITED';
+                }
+                document.getElementById('browserSecurity').textContent = securityLevel;
+                addLog('DEVICE', `Detected: ${deviceType} running ${browserName}`, 'log-info');
+            }
+            function detectBrowser() {
+                const features = {
+                    webGL: !!window.WebGLRenderingContext,
+                    localStorage: !!window.localStorage,
+                    sessionStorage: !!window.sessionStorage,
+                    webWorkers: !!window.Worker,
+                    crypto: !!(window.crypto && window.crypto.subtle)
+                };
+                const supportedFeatures = Object.keys(features).filter(key => features[key]).length;
+                addLog('BROWSER', `Security features: ${supportedFeatures}/5 supported`, 'log-info');
+            }
+            function checkIPInfo() {
+                fetch('https://ipapi.co/json/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.ip) {
+                            const ipInfo = `
+                                IP: ${data.ip}<br>
+                                Location: ${data.city || 'Unknown'}, ${data.country_name || 'Unknown'}<br>
+                                ISP: ${data.org || 'Unknown'}<br>
+                                Connection: ${data.connection_type || 'Unknown'}
+                            `;
+                            document.getElementById('ipDetails').innerHTML = ipInfo;
+                            addLog('IP', `Connection from ${data.ip} (${data.country_name || 'Unknown'})`, 'log-info');
+                            if (window.securityConfig) {
+                                window.securityConfig.stats.networkThreats = data.ip && !data.org.toLowerCase().includes('vpn') ? 1 : 0;
+                                window.securityConfig.stats.lastUpdate = Date.now();
+                                addLog('CONFIG', `Updated network threats: ${window.securityConfig.stats.networkThreats}`, 'log-info');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('ipDetails').textContent = 'IP detection unavailable in demo';
+                        addLog('IP', 'IP detection service unavailable', 'log-warning');
+                    });
+            }
+            function addLog(type, message, className = 'log-entry') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = className;
+                logEntry.textContent = `[${timestamp}] [${type}] ${message}`;
+                const terminal = document.getElementById('activityLog');
+                const cursor = terminal.querySelector('.blinking-cursor');
+                terminal.insertBefore(logEntry, cursor);
+                const entries = terminal.querySelectorAll('.log-entry, .log-info, .log-warning, .log-error, .log-success');
+                if (entries.length > 8) {
+                    terminal.removeChild(entries[0]);
+                }
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            function showAlert(message, duration = 4000) {
+                const alertBanner = document.getElementById('alertBanner');
+                const alertMessage = document.getElementById('alertMessage');
+                alertMessage.textContent = message;
+                alertBanner.style.display = 'block';
+                setTimeout(() => {
+                    alertBanner.style.display = 'none';
+                }, duration);
+            }
+            function runSecurityScan() {
+                if (scanCount >= maxDemoScans) {
+                    showAlert('Demo scan limit reached. Purchase full version for unlimited scans.');
+                    return;
+                }
+                const button = document.getElementById('scanButton');
+                button.textContent = '🔄 Scanning...';
+                button.disabled = true;
+                scanCount++;
+                document.getElementById('scanCount').textContent = `${scanCount}/${maxDemoScans}`;
+                addLog('SCAN', 'Demo security scan initiated', 'log-info');
+                let progress = 0;
+                const scanInterval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(scanInterval);
+                        completeScan();
+                    }
+                    document.getElementById('securityProgress').style.width = progress + '%';
+                }, 300);
+                function completeScan() {
+                    button.textContent = '🔍 Run Security Scan';
+                    button.disabled = false;
+                    const score = Math.floor(Math.random() * 10) + 88;
+                    document.getElementById('securityScore').textContent = score + '%';
+                    document.getElementById('securityProgress').style.width = score + '%';
+                    document.getElementById('lastScan').textContent = new Date().toLocaleTimeString();
+                    addLog('SCAN', `Demo scan completed - Score: ${score}%`, 'log-success');
+                    if (scanCount >= maxDemoScans) {
+                        addLog('LIMIT', 'Demo scan limit reached', 'log-warning');
+                        showAlert('Demo version limited to 3 scans. Upgrade for unlimited scanning.');
+                    }
+                }
+            }
+            function runNetworkScan() {
+                const button = document.getElementById('networkScan');
+                button.textContent = '🔄 Scanning...';
+                button.disabled = true;
+                addLog('NETWORK', 'Demo network scan started', 'log-info');
+                setTimeout(() => {
+                    button.textContent = '📡 Network Scan';
+                    button.disabled = false;
+                    const nodes = document.querySelectorAll('.network-node');
+                    nodes.forEach(node => node.className = 'network-node node-secure');
+                    if (Math.random() < 0.3) {
+                        const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+                        randomNode.className = 'network-node node-warning';
+                        addLog('NETWORK', 'Demo: Simulated minor network issue detected', 'log-warning');
+                    } else {
+                        addLog('NETWORK', 'Demo: All network nodes secure', 'log-success');
+                    }
+                    showAlert('Demo network scan completed. Full version provides real-time monitoring.');
+                }, 2000);
+            }
+            document.getElementById('scanButton').addEventListener('click', runSecurityScan);
+            document.getElementById('networkScan').addEventListener('click', runNetworkScan);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+            console.log('🛡️ HackerWatch-Fortress Demo v2.3 Loaded');
+            console.log('📧 Contact: lexalytics@yahoo.com');
+            console.log('🚀 Full version: https://coldnsteel.github.io/GMSRFC/fortress-grand-opening.html');
+        })();
+    </script>
+</body>
+</html>
