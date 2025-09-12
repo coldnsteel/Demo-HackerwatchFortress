@@ -1,0 +1,52 @@
+{
+  "name": "HackerWatch Fortress Demo",
+  "short_name": "HackerWatch Demo",
+  "description": "Demo of universal mobile cybersecurity threat detection with ψΩ§∞ protection",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#00ff00",
+  "background_color": "#0a0a0a",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["security", "utilities", "productivity"],
+  "icons": [
+    {"src": "icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any"},
+    {"src": "icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any"},
+    {"src": "icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any"},
+    {"src": "icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any"},
+    {"src": "icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any"},
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "shortcuts": [
+    {
+      "name": "Connect Backend",
+      "short_name": "Connect",
+      "description": "Connect to HackerWatch backend",
+      "url": "/?action=connect",
+      "icons": [{"src": "icon-96.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "Emergency Stop",
+      "short_name": "Emergency",
+      "description": "Emergency shutdown",
+      "url": "/?action=emergency",
+      "icons": [{"src": "icon-96.png", "sizes": "96x96"}]
+    }
+  ],
+  "screenshots": [
+    {"src": "screenshot-mobile.png", "sizes": "540x720", "type": "image/png", "platform": "narrow"},
+    {"src": "screenshot-desktop.png", "sizes": "1280x720", "type": "image/png", "platform": "wide"}
+  ],
+  "features": [
+    "Real-time threat detection",
+    "WiFi Pineapple scanning",
+    "Bluetooth security monitoring",
+    "Mobile-responsive design",
+    "Haptic feedback",
+    "Cross-platform compatibility"
+  ],
+  "iarc_rating_id": "e58c174a-81d2-5c3c-32cc-34b8de4a52e9"
+}
