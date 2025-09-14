@@ -1,1 +1,8 @@
-
+{
+  "name": "demo-hackerwatch-fortress",
+  "version": "2.3.0",
+  "private": true,
+  "scripts": {
+    "start": "echo 'Static demo, no server needed'"
+  }
+}
